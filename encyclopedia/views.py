@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import CreateNewEntry, EditEntry
 from random import choice
 from . import util
+from markdown2 import Markdown
 
 
 def index(request):
@@ -10,14 +11,15 @@ def index(request):
     })
 
 def entry(request, title):
-    if util.get_entry(title) == None:
+    content = convert_md_to_html(title)
+    if content == None:
         return render(request, "encyclopedia/error.html", {
             "title": title
         })
     else:
         return render(request, "encyclopedia/entry.html", {
             "title": title,
-            "entry": util.get_entry(title)
+            "entry": content
         })
 
 def search(request):
@@ -88,3 +90,13 @@ def random(request):
         "title": title,
         "content": util.get_entry(title)
     })
+
+
+def convert_md_to_html(title):
+    content = util.get_entry(title)
+    markdowner = Markdown()
+    if content == None:
+        return None
+    else:
+        return markdowner.convert(content)
+    
